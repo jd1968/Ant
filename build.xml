@@ -1,0 +1,58 @@
+<project name="BB Dev Deploy" default="deployCode" basedir="." xmlns:sf="antlib:com.salesforce">
+	<taskdef uri="antlib:com.salesforce" resource="com/salesforce/antlib.xml" classpath="lib/ant-salesforce.jar"/>
+	<!-- Get all settings like Server Path, username and passwords from "build.properties" file -->
+    <property file="build.properties"/>
+    <property environment="env"/>
+	<!-- Sequence 1 - Get All information from Source, Retrieve the contents into Src directory -->
+	<target name="retrieve">
+
+	  <delete dir="src"/>
+	  <mkdir dir="src"/>
+
+	  <sf:retrieve username="${sfSIT.username}"
+				   password="${sfSIT.password}"
+				   serverurl="${sfSIT.serverurl}"
+				   retrieveTarget="src"
+				   unpackaged="package.xml"/>
+	</target>
+
+	<target name="list">
+		<sf:listMetadata username="${sfSIT.username}"
+			password="${sfSIT.password}"
+			serverurl="${sfSIT.serverurl}"
+			metadataType="CustomObject"
+			resultFilePath="list.log"/>
+	</target>
+
+	<target name="describe">
+
+	  <sf:describeMetadata username="${sfSIT.username}"
+				   password="${sfSIT.password}"
+				   serverurl="${sfSIT.serverurl}"
+				   resultFilePath="describe.log"/>
+	</target>
+
+	<!-- Sequence 2 - Deploy to Target System, Package.xml is present in Src folder -->
+	<target name="deploy">
+      <sf:deploy username="${sfDevWave.username}"
+				 password="${sfDevWave.password}"
+				 serverurl="${sfDevWave.serverurl}"
+				 deployroot="src">
+      </sf:deploy>
+    </target> 
+
+	<!-- Sequence 3 - If you want to remove some components, destructiveChanges.xml and Package.xml present in Delete Folder  -->
+	<target name="unDeploy">
+      <sf:deploy username="${sfSIT.username}"
+				 password="${sfSIT.password}"
+				 serverurl="${sfSIT.serverurl}"
+				 deployroot="delete" purgeOnDelete="true">
+      </sf:deploy>
+    </target>
+
+    <target name="exec">
+    	<exec executable="echo">
+    		<arg value="Hello John"/>
+    	</exec>
+    </target>	
+</project>
